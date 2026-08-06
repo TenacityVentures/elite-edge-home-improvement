@@ -45,13 +45,6 @@
         </ul>
       </nav>
       <a class="nav-cta" href="tel:19783052157">(978) 305-2157</a>
-      <!-- Client-facing palette switch. Delete this button, the .theme-toggle
-           rules, and the theme script once a palette is chosen. -->
-      <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false"
-        aria-label="Switch colour theme">
-        <span class="tt-dot" aria-hidden="true"></span>
-        <span class="tt-label">Light</span>
-      </button>
       <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false"
         aria-controls="navList">&#9776;</button>
     </div>
@@ -419,31 +412,6 @@
         size();
         window.addEventListener('resize', size);
         requestAnimationFrame(frame);
-      })();
-
-      /* ---------- theme switch ----------
-         Lets the client compare both palettes live. The choice is stored so
-         it survives a reload; the head script applies it before first paint. */
-      (function theme() {
-        var btn = document.getElementById('themeToggle');
-        if (!btn) return;
-        var docEl = document.documentElement;
-        var label = btn.querySelector('.tt-label');
-
-        function apply(mode, persist) {
-          if (mode === 'light') docEl.setAttribute('data-theme', 'light');
-          else docEl.removeAttribute('data-theme');
-          btn.setAttribute('aria-pressed', String(mode === 'light'));
-          /* the label names what you get by clicking, not the current state */
-          if (label) label.textContent = mode === 'light' ? 'Dark' : 'Light';
-          refreshDust();
-          if (persist) { try { localStorage.setItem('ee-theme', mode); } catch (e) { } }
-        }
-
-        apply(docEl.getAttribute('data-theme') === 'light' ? 'light' : 'dark', false);
-        btn.addEventListener('click', function () {
-          apply(docEl.getAttribute('data-theme') === 'light' ? 'dark' : 'light', true);
-        });
       })();
 
       /* ---------- GSAP scroll choreography ---------- */
