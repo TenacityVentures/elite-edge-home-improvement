@@ -1,5 +1,17 @@
+/* ============================================================
+   THEMES
+   Dark is the default. The light theme is opt-in via
+   <html data-theme="light">, set by the toggle in the header.
+
+   To ship a single theme once the client picks, delete the
+   toggle button + its script and either keep this :root block
+   (dark) or fold the [data-theme="light"] values into it.
+   ============================================================ */
+
 :root {
+    /* --- surfaces & text --- */
     --black: #0b0b0d;
+    /* page base */
     --panel: #141417;
     --panel-2: #1a1a1e;
     --line: #2a2a2e;
@@ -8,6 +20,92 @@
     --silver: #b9bcc2;
     --cream: #eae7df;
     --muted: #9a978f;
+
+    /* --- fixed regardless of theme --- */
+    /* A filled gold button stays bright in both themes, so its fill and the
+       text on it are theme-independent. --gold/--gold-bright do shift, because
+       they are used as *ink* and have to earn contrast against the page. */
+    --gold-fill: linear-gradient(135deg, #e0bf6f, #c9a24b);
+    --gold-solid: #c9a24b;
+    --on-gold: #0b0b0d;
+    /* text sitting directly on a photograph, over its own dark scrim */
+    --on-photo: #eae7df;
+    --on-photo-accent: #e0bf6f;
+
+    /* --- themeable overlays --- */
+    --header-bg: rgba(11, 11, 13, 0.88);
+    --menu-bg: rgba(11, 11, 13, 0.97);
+    --card-glass: rgba(26, 26, 30, 0.82);
+    --ghost-border: rgba(234, 231, 223, 0.35);
+    --hero-shadow: 0 2px 40px rgba(0, 0, 0, 0.6);
+    --hero-lede-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);
+    --footer-credit: #838078;
+    --footer-credit-line: #3a3833;
+
+    /* hero particles, read by the canvas script */
+    --dust-rgb: 224, 191, 111;
+
+    /* photo treatments */
+    --media-filter: grayscale(0.45) brightness(0.72);
+    --media-filter-hover: grayscale(0) brightness(0.92);
+    --shot-filter: brightness(0.8);
+
+    /* gradient scrims */
+    --hero-scrim: linear-gradient(180deg, rgba(11, 11, 13, 0.92) 0%, rgba(11, 11, 13, 0.55) 35%, rgba(11, 11, 13, 0.80) 78%, var(--black) 100%);
+    --story-scrim: linear-gradient(180deg, rgba(11, 11, 13, 0.10), rgba(11, 11, 13, 0.62));
+    --service-scrim: linear-gradient(180deg, rgba(11, 11, 13, 0) 35%, rgba(11, 11, 13, 0.85) 100%);
+    --contact-scrim: linear-gradient(180deg, var(--black) 0%, rgba(11, 11, 13, 0.60) 34%, rgba(11, 11, 13, 0.80) 100%);
+}
+
+/* ---------- light theme ---------- */
+:root[data-theme="light"] {
+    --black: #faf9f7;
+    /* warm white page base */
+    --panel: #f2f0eb;
+    --panel-2: #eae7e0;
+    --line: #ddd9d0;
+    /* gold is darkened for contrast against white; --gold-bright is the
+       *emphasis* token, so on a light background it is the darker of the two */
+    --gold: #836619;
+    --gold-bright: #7d611c;
+    --silver: #4a4a52;
+    --cream: #17171a;
+    --muted: #6b6862;
+
+    --header-bg: rgba(250, 249, 247, 0.9);
+    --menu-bg: rgba(250, 249, 247, 0.97);
+    --card-glass: rgba(255, 255, 255, 0.78);
+    --ghost-border: rgba(23, 23, 26, 0.3);
+    --hero-shadow: 0 2px 30px rgba(255, 255, 255, 0.9);
+    --hero-lede-shadow: 0 1px 16px rgba(255, 255, 255, 0.95);
+    --footer-credit: #767269;
+    --footer-credit-line: #d5d1c8;
+
+    --dust-rgb: 150, 116, 38;
+
+    --media-filter: none;
+    --media-filter-hover: brightness(1.04);
+    --shot-filter: none;
+
+    --hero-scrim: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.58) 34%, rgba(255, 255, 255, 0.78) 74%, var(--black) 100%);
+    --story-scrim: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.28));
+    --service-scrim: linear-gradient(180deg, rgba(255, 255, 255, 0) 45%, rgba(255, 255, 255, 0.30) 100%);
+    --contact-scrim: linear-gradient(180deg, var(--black) 0%, rgba(255, 255, 255, 0.74) 34%, rgba(255, 255, 255, 0.88) 100%);
+}
+
+/* Swap the photography with the theme. The dark theme wants dusk exteriors;
+   under a white wash those go muddy and the type loses contrast, so the light
+   theme gets daylight shots instead. Applies to the hero and the contact band. */
+.img-light {
+    display: none;
+}
+
+:root[data-theme="light"] .img-dark {
+    display: none;
+}
+
+:root[data-theme="light"] .img-light {
+    display: block;
 }
 
 * {
@@ -92,7 +190,7 @@ header {
 }
 
 header.solid {
-    background: rgba(11, 11, 13, 0.88);
+    background: var(--header-bg);
     backdrop-filter: blur(10px);
     border-bottom-color: var(--line);
 }
@@ -166,8 +264,8 @@ nav ul a:focus-visible {
 }
 
 .nav-cta:hover {
-    background: var(--gold);
-    color: var(--black);
+    background: var(--gold-solid);
+    color: var(--on-gold);
 }
 
 .menu-toggle {
@@ -179,6 +277,49 @@ nav ul a:focus-visible {
     line-height: 1;
     cursor: pointer;
     padding: 4px 6px;
+}
+
+/* ---------- theme toggle ----------
+   Client-facing switch so both palettes can be compared live.
+   Remove this rule, the button in index.html, and the theme script
+   once a palette is chosen. */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--silver);
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    margin-left: 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .25s ease, border-color .25s ease;
+}
+
+.theme-toggle:hover {
+    color: var(--gold-bright);
+    border-color: var(--gold);
+}
+
+.theme-toggle .tt-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    transition: background .25s ease;
+}
+
+:root[data-theme="light"] .theme-toggle .tt-dot {
+    background: #16161a;
 }
 
 /* ---------- hero ---------- */
@@ -221,10 +362,7 @@ nav ul a:focus-visible {
     position: absolute;
     inset: 0;
     z-index: -2;
-    background:
-
-        /*radial-gradient(ellipse at 50% 42%, rgba(11, 11, 13, 0.30), rgba(11, 11, 13, 0.86) 68%),*/
-        linear-gradient(180deg, rgba(11, 11, 13, 0.92) 0%, rgba(11, 11, 13, 0.55) 35%, rgba(11, 11, 13, 0.80) 78%, var(--black) 100%);
+    background: var(--hero-scrim);
 }
 
 .hero-dust {
@@ -248,7 +386,7 @@ nav ul a:focus-visible {
     color: var(--cream);
     max-width: 840px;
     margin: 0 auto 20px;
-    text-shadow: 0 2px 40px rgba(0, 0, 0, 0.6);
+    text-shadow: var(--hero-shadow);
 }
 
 .hero h1 .w {
@@ -265,7 +403,7 @@ nav ul a:focus-visible {
     margin: 0 auto 36px;
     color: var(--silver);
     font-size: 1.05rem;
-    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);
+    text-shadow: var(--hero-lede-shadow);
 }
 
 .hero-actions {
@@ -286,8 +424,8 @@ nav ul a:focus-visible {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-    color: var(--black);
+    background: var(--gold-fill);
+    color: var(--on-gold);
     font-weight: 500;
 }
 
@@ -297,7 +435,7 @@ nav ul a:focus-visible {
 }
 
 .btn-ghost {
-    border-color: rgba(234, 231, 223, 0.35);
+    border-color: var(--ghost-border);
     color: var(--cream);
     backdrop-filter: blur(4px);
 }
@@ -414,7 +552,7 @@ section[id] {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(11, 11, 13, 0.10), rgba(11, 11, 13, 0.62));
+    background: var(--story-scrim);
     pointer-events: none;
 }
 
@@ -481,21 +619,21 @@ section[id] {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: grayscale(0.45) brightness(0.72);
+    filter: var(--media-filter);
     transition: transform .7s cubic-bezier(.2, .7, .2, 1), filter .5s ease;
 }
 
 .service-card:hover .service-media img,
 .service-card:focus-within .service-media img {
     transform: scale(1.07);
-    filter: grayscale(0) brightness(0.92);
+    filter: var(--media-filter-hover);
 }
 
 .service-media::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(11, 11, 13, 0) 35%, rgba(11, 11, 13, 0.85) 100%);
+    background: var(--service-scrim);
 }
 
 .service-body {
@@ -568,7 +706,7 @@ section[id] {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(0.8);
+    filter: var(--shot-filter);
     transition: transform .8s cubic-bezier(.2, .7, .2, 1), filter .5s ease;
 }
 
@@ -583,17 +721,19 @@ section[id] {
     right: 0;
     bottom: 0;
     padding: 24px 22px 20px;
+    /* this text sits on the photo itself, so it keeps its own dark scrim
+       and light type in both themes — page colours would be unreadable here */
     background: linear-gradient(180deg, transparent, rgba(11, 11, 13, 0.9));
     font-size: 0.78rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--cream);
+    color: var(--on-photo);
 }
 
 .shot figcaption b {
     display: block;
     font-weight: 400;
-    color: var(--gold-bright);
+    color: var(--on-photo-accent);
     font-size: 0.68rem;
     letter-spacing: 0.24em;
     margin-bottom: 4px;
@@ -673,7 +813,7 @@ section[id] {
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(180deg, var(--black) 0%, rgba(11, 11, 13, 0.60) 34%, rgba(11, 11, 13, 0.80) 100%);
+    background: var(--contact-scrim);
 }
 
 .contact-grid {
@@ -727,7 +867,7 @@ section[id] {
 }
 
 .contact-cta {
-    background: rgba(26, 26, 30, 0.82);
+    background: var(--card-glass);
     backdrop-filter: blur(6px);
     border: 1px solid var(--line);
     padding: 44px;
@@ -765,11 +905,11 @@ footer .fbrand {
 footer .credit {
     margin-top: 10px;
     font-size: 0.7rem;
-    color: #5f5d58;
+    color: var(--footer-credit);
 }
 
 footer .credit a {
-    border-bottom: 1px solid #3a3833;
+    border-bottom: 1px solid var(--footer-credit-line);
 }
 
 footer .credit a:hover {
@@ -789,7 +929,7 @@ html.js-anim .reveal {
         top: 72px;
         flex-direction: column;
         gap: 0;
-        background: rgba(11, 11, 13, 0.97);
+        background: var(--menu-bg);
         backdrop-filter: blur(10px);
         border-bottom: 1px solid var(--line);
         padding: 8px 28px 22px;
@@ -821,6 +961,14 @@ html.js-anim .reveal {
 
     .nav-cta {
         display: none;
+    }
+
+    .theme-toggle {
+        margin-left: auto;
+        margin-right: 12px;
+        padding: 7px 11px;
+        font-size: 0.6rem;
+        letter-spacing: 0.12em;
     }
 
     .story-grid {

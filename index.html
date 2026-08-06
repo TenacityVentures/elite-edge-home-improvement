@@ -15,6 +15,15 @@
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Jost:wght@300;400;500;600&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    /* Applied before first paint so a chosen theme never flashes dark first. */
+    (function () {
+      try {
+        if (localStorage.getItem('ee-theme') === 'light')
+          document.documentElement.setAttribute('data-theme', 'light');
+      } catch (e) { }
+    })();
+  </script>
 </head>
 
 <body>
@@ -36,6 +45,13 @@
         </ul>
       </nav>
       <a class="nav-cta" href="tel:19783052157">(978) 305-2157</a>
+      <!-- Client-facing palette switch. Delete this button, the .theme-toggle
+           rules, and the theme script once a palette is chosen. -->
+      <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false"
+        aria-label="Switch colour theme">
+        <span class="tt-dot" aria-hidden="true"></span>
+        <span class="tt-label">Light</span>
+      </button>
       <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-expanded="false"
         aria-controls="navList">&#9776;</button>
     </div>
@@ -43,8 +59,12 @@
 
   <section class="hero">
     <div class="hero-media">
-      <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=2000&q=80"
+      <img class="img-dark"
+        src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=2000&q=80"
         alt="Warmly lit home at dusk" fetchpriority="high" decoding="async">
+      <img class="img-light"
+        src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=2000&q=80"
+        alt="Bright home with a full front porch" decoding="async">
     </div>
     <div class="hero-scrim"></div>
     <canvas class="hero-dust" id="dust" aria-hidden="true"></canvas>
@@ -258,7 +278,11 @@
 
   <section class="contact" id="contact">
     <div class="contact-media" data-parallax>
-      <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1600&q=80" alt=""
+      <img class="img-dark"
+        src="https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1600&q=80" alt=""
+        loading="lazy" decoding="async">
+      <img class="img-light"
+        src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80" alt=""
         loading="lazy" decoding="async">
     </div>
     <div class="wrap">
@@ -334,10 +358,22 @@
       var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       /* ---------- hero gold dust (canvas, no library) ---------- */
+      /* reassigned by dust() so the theme switch can recolour the motes */
+      var refreshDust = function () { };
+
       (function dust() {
         var c = document.getElementById('dust');
         if (!c || reduced) return;
         var ctx = c.getContext('2d');
+        var dustRGB = '224,191,111';
+
+        function readDust() {
+          var v = getComputedStyle(document.documentElement)
+            .getPropertyValue('--dust-rgb').trim();
+          if (v) dustRGB = v;
+        }
+        readDust();
+        refreshDust = readDust;
         var dpr = Math.min(window.devicePixelRatio || 1, 2);
         var motes = [];
 
@@ -374,7 +410,7 @@
             if (m.x > r.width + 10) m.x = -10;
             ctx.beginPath();
             ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(224,191,111,' + (m.a * (0.55 + 0.45 * Math.sin(m.t))).toFixed(3) + ')';
+            ctx.fillStyle = 'rgba(' + dustRGB + ',' + (m.a * (0.55 + 0.45 * Math.sin(m.t))).toFixed(3) + ')';
             ctx.fill();
           }
           requestAnimationFrame(frame);
@@ -383,6 +419,31 @@
         size();
         window.addEventListener('resize', size);
         requestAnimationFrame(frame);
+      })();
+
+      /* ---------- theme switch ----------
+         Lets the client compare both palettes live. The choice is stored so
+         it survives a reload; the head script applies it before first paint. */
+      (function theme() {
+        var btn = document.getElementById('themeToggle');
+        if (!btn) return;
+        var docEl = document.documentElement;
+        var label = btn.querySelector('.tt-label');
+
+        function apply(mode, persist) {
+          if (mode === 'light') docEl.setAttribute('data-theme', 'light');
+          else docEl.removeAttribute('data-theme');
+          btn.setAttribute('aria-pressed', String(mode === 'light'));
+          /* the label names what you get by clicking, not the current state */
+          if (label) label.textContent = mode === 'light' ? 'Dark' : 'Light';
+          refreshDust();
+          if (persist) { try { localStorage.setItem('ee-theme', mode); } catch (e) { } }
+        }
+
+        apply(docEl.getAttribute('data-theme') === 'light' ? 'light' : 'dark', false);
+        btn.addEventListener('click', function () {
+          apply(docEl.getAttribute('data-theme') === 'light' ? 'dark' : 'light', true);
+        });
       })();
 
       /* ---------- GSAP scroll choreography ---------- */
@@ -444,7 +505,9 @@
 
         /* parallax figures */
         gsap.utils.toArray('[data-parallax]').forEach(function (fig) {
-          gsap.fromTo(fig.querySelector('img'), { yPercent: -8 }, {
+          /* all imgs, not just the first: themed figures hold a dark and a
+             light source and only one of them is displayed */
+          gsap.fromTo(fig.querySelectorAll('img'), { yPercent: -8 }, {
             yPercent: 8, ease: 'none',
             scrollTrigger: { trigger: fig, start: 'top bottom', end: 'bottom top', scrub: true }
           });
