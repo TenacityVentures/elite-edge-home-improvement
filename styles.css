@@ -852,6 +852,10 @@ section[id] {
     font-size: 1.1rem;
 }
 
+.icon-circle svg {
+    display: block;
+}
+
 .contact-list .label {
     display: block;
     color: var(--muted);
